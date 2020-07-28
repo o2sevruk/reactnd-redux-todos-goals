@@ -4,6 +4,9 @@
 	<head>
 		<title>Udacity Todos Goals</title>
 		<script src="redux-3.7.2.min.js"></script>
+		<script src="react-16.3.0-alpha.1.js"></script>
+		<script src="react-dom-16.3.0-alpha.1.js"></script>
+		<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 	</head>
 	
 	<body>
@@ -22,5 +25,59 @@
 		</div>
 	</body>
 	
+	<hr />
+	
+	<div id="app"></div>
+	
 	<script src="index.js"></script>
+	
+	<script type="text/babel">
+		function List(props) {
+			return (
+				<ul>
+					<li>List</li>
+				</ul>
+			);
+		}
+		
+		class Todos extends React.Component {
+			render() {
+				return (
+					<div>
+						TODOS
+						
+						<List />
+					</div>
+				);
+			}
+		}
+		
+		class Goals extends React.Component {
+			render() {
+				return (
+					<div>
+						GOALS
+						
+						<List />
+					</div>
+				);
+			}
+		}
+		
+		class App extends React.Component {
+			render() {
+				return (
+					<div>
+						<Todos />
+						<Goals />
+					</div>
+				);
+			}
+		}
+		
+		ReactDOM.render(
+			<App />,
+			document.getElementById('app')
+		);
+	</script>
 </html>
