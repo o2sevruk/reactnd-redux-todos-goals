@@ -82,22 +82,32 @@ function goals(state = [], action) {
 // /Actions
 
 // Middleware
-function checkAndDispatch(store, action) {
-	if (
-		action.type === ADD_TODO &&
-		action.todo.name.toLowerCase().includes('bitcoin')
-	) {
-		return alert("Nope! That's a bad idea.");
-	}
+const checker = (store) => (next) => (action) => {
+  if (
+    action.type === ADD_TODO &&
+    action.todo.name.toLowerCase().includes('bitcoin')
+  ) {
+    return alert("Nope! That's a bad idea.");
+  }
+  
+  if (
+    action.type === ADD_GOAL &&
+    action.goal.name.toLowerCase().includes('bitcoin')
+  ) {
+    return alert("Nope! That's a bad idea.");
+  }
+  
+  return next(action);
+}
+
+const logger = (store) => (next) => (action) => {
+	console.group(action.type);
+		console.log('The action is: ', action);
+		const result = next(action);
+		console.log('The new state is: ', store.getState());
+	console.groupEnd();
 	
-	if (
-		action.type === ADD_GOAL &&
-		action.goal.name.toLowerCase().includes('bitcoin')
-	) {
-		return alert("Nope! That's a bad idea.");
-	}
-	
-	return store.dispatch(action);
+	return result;
 }
 
 // /Middleware
@@ -106,7 +116,7 @@ function checkAndDispatch(store, action) {
 const store = Redux.createStore(Redux.combineReducers({
 	goals,
 	todos
-}));
+}), Redux.applyMiddleware(checker, logger));
 
 store.subscribe(() => {
 	const {goals, todos} = store.getState();
@@ -133,7 +143,7 @@ function addTodo() {
 		name = input.value;
 	input.value = '';
   
-  checkAndDispatch(store, addTodoAction({
+  store.dispatch(addTodoAction({
 		name,
 		id: generateId(),
 		complete: false
@@ -145,7 +155,7 @@ function addGoal() {
 		name = input.value;
 	input.value = '';
   
-  checkAndDispatch(store, addGoalAction({
+  store.dispatch(addGoalAction({
 		name,
 		id: generateId()
 	}));
@@ -156,14 +166,14 @@ function addTodoToDOM(todo) {
 		text = document.createTextNode(todo.name);
 	
 	const removeBtn = createRemoveButton(() => {
-		store.dispatch(removeTodoAction(todo.id));
+    store.dispatch(removeTodoAction(todo.id));
 	});
 	
 	node.appendChild(text);
 	node.appendChild(removeBtn);
 	node.style.textDecoration = todo.complete ? 'line-through' : 'none';
 	node.addEventListener('click', () => {
-		store.dispatch(toggleTodoAction(todo.id));
+    store.dispatch(toggleTodoAction(todo.id));
 	});
 	
 	document.getElementById('todos').appendChild(node);
@@ -173,7 +183,7 @@ function addGoalToDOM(goal) {
 	const node = document.createElement('li');
 	const text = document.createTextNode(goal.name);
 	const removeBtn = createRemoveButton(() => {
-		store.dispatch(removeGoalAction(goal.id));
+    store.dispatch(removeGoalAction(goal.id));
 	});
 	
 	node.appendChild(text);
