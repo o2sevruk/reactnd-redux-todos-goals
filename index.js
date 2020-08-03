@@ -10,9 +10,30 @@ const ADD_TODO = 'ADD_TODO',
 	REMOVE_TODO = 'REMOVE_TODO',
 	TOGGLE_TODO = 'TOGGLE_TODO',
 	ADD_GOAL = 'ADD_GOAL',
-	REMOVE_GOAL = 'REMOVE_GOAL';
+	REMOVE_GOAL = 'REMOVE_GOAL',
+	RECEIVE_DATA = 'RECEIVE_DATA';
 
 // Actions
+// --- OVERALL
+function loading(state = true, action) {
+	switch (action.type) {
+		case RECEIVE_DATA :
+			return false;
+		default :
+			return state;
+	}
+}
+
+function receiveDataAction(todos, goals) {
+	return {
+		type: RECEIVE_DATA,
+		todos,
+		goals
+	}
+}
+
+// --- /OVERALL
+
 // --- TODOS
 function addTodoAction(todo) {
 	return {
@@ -44,6 +65,8 @@ function todos(state = [], action) {
 		case TOGGLE_TODO :
 			return state.map((todo) => todo.id !== action.id ? todo :
 				Object.assign({}, todo, {complete: !todo.complete}));
+		case RECEIVE_DATA :
+			return action.todos
 		default :
 			return state;
 	}
@@ -72,6 +95,8 @@ function goals(state = [], action) {
 			return state.concat([action.goal]);
 		case REMOVE_GOAL :
 			return state.filter((goal) => goal.id !== action.id);
+		case RECEIVE_DATA :
+			return action.goals
 		default :
 			return state;
 	}
@@ -83,117 +108,31 @@ function goals(state = [], action) {
 
 // Middleware
 const checker = (store) => (next) => (action) => {
-  if (
-    action.type === ADD_TODO &&
-    action.todo.name.toLowerCase().includes('bitcoin')
-  ) {
-    return alert("Nope! That's a bad idea.");
-  }
-  
-  if (
-    action.type === ADD_GOAL &&
-    action.goal.name.toLowerCase().includes('bitcoin')
-  ) {
-    return alert("Nope! That's a bad idea.");
-  }
-  
-  return next(action);
+	if (
+		action.type === ADD_TODO &&
+		action.todo.name.toLowerCase().includes('bitcoin')
+	) {
+		return alert("Nope! That's a bad idea.");
+	}
+	
+	if (
+		action.type === ADD_GOAL &&
+		action.goal.name.toLowerCase().includes('bitcoin')
+	) {
+		return alert("Nope! That's a bad idea.");
+	}
+	
+	return next(action);
 }
 
 const logger = (store) => (next) => (action) => {
 	console.group(action.type);
-		console.log('The action is: ', action);
-		const result = next(action);
-		console.log('The new state is: ', store.getState());
+	console.log('The action is: ', action);
+	const result = next(action);
+	console.log('The new state is: ', store.getState());
 	console.groupEnd();
 	
 	return result;
 }
 
 // /Middleware
-
-// Store
-const store = Redux.createStore(Redux.combineReducers({
-	goals,
-	todos
-}), Redux.applyMiddleware(checker, logger));
-
-store.subscribe(() => {
-	const {goals, todos} = store.getState();
-	
-	document.getElementById('goals').innerHTML = '';
-	document.getElementById('todos').innerHTML = '';
-	
-	goals.forEach(addGoalToDOM);
-	todos.forEach(addTodoToDOM);
-})
-
-// /Store
-
-// Listeners
-function createRemoveButton(onClick) {
-	const removeBtn = document.createElement('button')
-	removeBtn.innerHTML = 'X'
-	removeBtn.addEventListener('click', onClick)
-	return removeBtn
-}
-
-function addTodo() {
-	const input = document.getElementById('todo'),
-		name = input.value;
-	input.value = '';
-  
-  store.dispatch(addTodoAction({
-		name,
-		id: generateId(),
-		complete: false
-	}));
-}
-
-function addGoal() {
-	const input = document.getElementById('goal'),
-		name = input.value;
-	input.value = '';
-  
-  store.dispatch(addGoalAction({
-		name,
-		id: generateId()
-	}));
-}
-
-function addTodoToDOM(todo) {
-	const node = document.createElement('li'),
-		text = document.createTextNode(todo.name);
-	
-	const removeBtn = createRemoveButton(() => {
-    store.dispatch(removeTodoAction(todo.id));
-	});
-	
-	node.appendChild(text);
-	node.appendChild(removeBtn);
-	node.style.textDecoration = todo.complete ? 'line-through' : 'none';
-	node.addEventListener('click', () => {
-    store.dispatch(toggleTodoAction(todo.id));
-	});
-	
-	document.getElementById('todos').appendChild(node);
-}
-
-function addGoalToDOM(goal) {
-	const node = document.createElement('li');
-	const text = document.createTextNode(goal.name);
-	const removeBtn = createRemoveButton(() => {
-    store.dispatch(removeGoalAction(goal.id));
-	});
-	
-	node.appendChild(text);
-	node.appendChild(removeBtn);
-	
-	document.getElementById('goals').append(node);
-}
-
-document.getElementById('todoBtn').addEventListener('click', addTodo);
-
-document.getElementById('goalBtn').addEventListener('click', addGoal);
-
-// /Listeners
