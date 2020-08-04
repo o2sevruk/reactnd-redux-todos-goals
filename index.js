@@ -119,14 +119,6 @@ function goals(state = [], action) {
 // /Actions
 
 // Middleware
-const thunk = (store) => (next) => (action) => {
-	if (typeof action === 'function') {
-		return action(store.dispatch);
-	}
-	
-	return next(action);
-}
-
 const checker = (store) => (next) => (action) => {
 	if (
 		action.type === ADD_TODO &&
