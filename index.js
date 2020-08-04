@@ -32,6 +32,17 @@ function receiveDataAction(todos, goals) {
 	}
 }
 
+function handleInitialData() {
+	return (dispatch) => {
+		return Promise.all([
+			API.fetchTodos(),
+			API.fetchGoals()
+		]).then(([todos, goals]) => {
+			dispatch(receiveDataAction(todos, goals));
+		});
+	}
+}
+
 // --- /OVERALL
 
 // --- TODOS
@@ -49,6 +60,26 @@ function removeTodoAction(id) {
 	}
 }
 
+function toggleTodoAction(id) {
+	return {
+		type: TOGGLE_TODO,
+		id
+	}
+}
+
+function handleAddTodo(name, cb) {
+	return (dispatch) => {
+		return API.saveTodo(name)
+			.then((todo) => {
+				dispatch(addTodoAction(todo));
+				cb();
+			})
+			.catch(() => {
+				alert('An error occurred!');
+			});
+	}
+}
+
 function handleDeleteTodo(todo) {
 	return (dispatch) => {
 		dispatch(removeTodoAction(todo.id))
@@ -61,10 +92,16 @@ function handleDeleteTodo(todo) {
 	}
 }
 
-function toggleTodoAction(id) {
-	return {
-		type: TOGGLE_TODO,
-		id
+function handleToggleTodo(id) {
+	return (dispatch) => {
+		dispatch(toggleTodoAction(id));
+		
+		return API.saveTodoToggle(id)
+			.catch(() => {
+				dispatch(toggleTodoAction(id));
+				
+				alert('An error occurred!');
+			});
 	}
 }
 
@@ -98,6 +135,32 @@ function removeGoalAction(id) {
 	return {
 		type: REMOVE_GOAL,
 		id
+	}
+}
+
+function handleAddGoal(name, cb) {
+	return (dispatch) => {
+		return API.saveGoal(name)
+			.then((goal) => {
+				dispatch(addGoalAction(goal));
+				cb();
+			})
+			.catch(() => {
+				alert('An error occurred!');
+			});
+	}
+}
+
+function handleDeleteGoal(goal) {
+	return (dispatch) => {
+		dispatch(removeGoalAction(goal.id));
+		
+		return API.deleteGoal(goal.id)
+			.catch(() => {
+				dispatch(addGoalAction(goal));
+				
+				alert('An error occurred!');
+			});
 	}
 }
 
