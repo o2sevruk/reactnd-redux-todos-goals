@@ -49,6 +49,18 @@ function removeTodoAction(id) {
 	}
 }
 
+function handleDeleteTodo(todo) {
+	return (dispatch) => {
+		dispatch(removeTodoAction(todo.id))
+		
+		return API.deleteTodo(todo.id)
+			.catch(() => {
+				dispatch(addTodoAction(todo))
+				alert('An error occurred. Try again.')
+			})
+	}
+}
+
 function toggleTodoAction(id) {
 	return {
 		type: TOGGLE_TODO,
@@ -107,6 +119,14 @@ function goals(state = [], action) {
 // /Actions
 
 // Middleware
+const thunk = (store) => (next) => (action) => {
+	if (typeof action === 'function') {
+		return action(store.dispatch);
+	}
+	
+	return next(action);
+}
+
 const checker = (store) => (next) => (action) => {
 	if (
 		action.type === ADD_TODO &&

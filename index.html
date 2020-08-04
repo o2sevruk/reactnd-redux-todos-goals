@@ -4,6 +4,7 @@
 	<head>
 		<title>Udacity Todos Goals</title>
 		<script src="redux-3.7.2.min.js"></script>
+		<script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
 		<script src="react-16.3.0-alpha.1.js"></script>
 		<script src="react-dom-16.3.0-alpha.1.js"></script>
 		<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
@@ -24,7 +25,7 @@
 				goals,
 				todos,
 				loading
-			}), Redux.applyMiddleware(checker, logger));
+			}), Redux.applyMiddleware(thunk, checker, logger));
 			
 			// /Store
 		</script>
